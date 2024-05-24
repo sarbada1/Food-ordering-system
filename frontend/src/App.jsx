@@ -1,17 +1,19 @@
-import React, { useState } from 'react'
-import Navbar from './components/Navbar/Navbar'
-import { Route, Routes } from 'react-router-dom'
-import Home from './pages/Home/Home'
-import Cart from './pages/Cart/Cart'
-import PlaceOrder from './pages/PlaceOrder/PlaceOrder'
-import Footer from './components/Footer/Footer'
-import LoginPopup from './components/LoginPopup/LoginPopup'
+import React, { useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import Navbar from './components/Navbar/Navbar';
+import Home from './pages/Home/Home';
+import Cart from './pages/Cart/Cart';
+import PlaceOrder from './pages/PlaceOrder/PlaceOrder';
+import Footer from './components/Footer/Footer';
+import LoginPopup from './components/LoginPopup/LoginPopup';
+import StoreProvider from './context/StoreContext';
 
 const App = () => {
-  const[showLogin,setShowLogin]=useState(false)
+  const [showLogin, setShowLogin] = useState(false);
+
   return (
-    <>
-    {showLogin?<LoginPopup setShowLogin={setShowLogin} />:<></> }
+    <StoreProvider>
+      {showLogin && <LoginPopup setShowLogin={setShowLogin} />}
       <div className='app'>
         <Navbar setShowLogin={setShowLogin} />
         <Routes>
@@ -21,8 +23,8 @@ const App = () => {
         </Routes>
       </div>
       <Footer />
-    </>
-  )
+    </StoreProvider>
+  );
 }
 
-export default App
+export default App;
