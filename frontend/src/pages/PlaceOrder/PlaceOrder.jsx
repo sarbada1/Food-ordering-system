@@ -3,9 +3,10 @@ import './PlaceOrder.css';
 import { StoreContext } from '../../context/StoreContext';
 import KhaltiCheckout from 'khalti-checkout-web';
 import { env } from '../../config/EnvironmentConfig';
+import axios from 'axios';
 
 const PlaceOrder = () => {
-  const { getTotalCartAmount, token, cartItems, url } = useContext(StoreContext);
+  const { getTotalCartAmount, food_list, token, cartItems, url } = useContext(StoreContext);
 
   const [data, setData] = useState({
     firstName: "",
@@ -25,94 +26,53 @@ const PlaceOrder = () => {
     setData(data => ({ ...data, [name]: value }));
   };
 
-  const handleKhaltiPayment = async () => {
-    // Save the order to your backend
-    const orderResponse = await fetch(`${url}/api/order/place-order`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        token
-      },
-      body: JSON.stringify({
-        userId: "user-id", // Replace with actual user ID
-        items: cartItems,
-        amount: getTotalCartAmount() + 2, // Assuming delivery fee is 2
-        address: `${data.street}, ${data.city}, ${data.state}, ${data.zipcode}, ${data.country}`
-      })
+  const placeorder = async (event) => {
+    event.preventDefault();
+    let orderItems = [];
+    food_list.map((item) => {
+      if (cartItems[item._id] > 0) {
+        let itemInfo = { ...item, quantity: cartItems[item._id] }; // Make sure not to mutate the original item object
+        orderItems.push(itemInfo);
+      }
     });
-
-    const orderData = await orderResponse.json();
-
-    if (orderData.success) {
-      const khaltiConfig = {
-        publicKey: env.PUBLIC_KEY, 
-        productIdentity: orderData.order._id,
-        productName: 'Food Order',
-        productUrl: `${url}/product/${orderData.order._id}`,
-        eventHandler: {
-          onSuccess(payload) {
-            console.log(payload);
-            // Verify payment on backend
-            fetch(`${url}/api/khalti-verify`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(payload)
-            }).then(res => res.json()).then(data => {
-              if (data.success) {
-                window.location.href = `${url}/verify?success=true&orderId=${orderData.order._id}`;
-              } else {
-                window.location.href = `${url}/verify?success=false&orderId=${orderData.order._id}`;
-              }
-            }).catch(error => console.error('Error verifying payment', error));
-          },
-          onError(error) {
-            console.error(error);
-          },
-          onClose() {
-            console.log('Widget is closing');
-          }
-        },
-        paymentPreference: [
-          'KHALTI',
-          'EBANKING',
-          'MOBILE_BANKING',
-          'CONNECT_IPS',
-          'SCT',
-        ],
-      };
-
-      let checkout = new KhaltiCheckout(khaltiConfig);
-      checkout.show({ amount: (getTotalCartAmount() + 2) * 100 });
-    } else {
-      console.error('Error placing order', orderData.message);
+    let orderData = {
+      address: data,
+      items: orderItems,
+      amount: getTotalCartAmount() + 20,
+    };
+    try {
+      let response = await axios.post(`${url}/api/order/place`, orderData, { headers: { token } });
+      if (response.data.success) {
+        const { session_url } = response.data;
+        window.location.replace(session_url);
+      } else {
+        alert("Error");
+      }
+    } catch (error) {
+      console.error("Order placement error:", error);
+      alert("Error placing order");
     }
   };
 
   return (
-    <form className='place-order'>
+    <form onSubmit={placeorder} className='place-order'>
       <div className="place-order-left">
         <p className="title">Delivery Information</p>
         <div className="multi-fields">
-          <input name='firstName' onChange={onChangeHandler} value={data.firstName} type="text" placeholder='First Name' />
-          <input name='lastName' onChange={onChangeHandler} value={data.lastName} type="text" placeholder='Last Name' />
+          <input name='firstName' onChange={onChangeHandler} value={data.firstName} type="text" placeholder='First Name' required />
+          <input name='lastName' onChange={onChangeHandler} value={data.lastName} type="text" placeholder='Last Name' required />
         </div>
-
-        <input name='email' onChange={onChangeHandler} value={data.email} type="email" placeholder='Email address' />
-        <input name='street' onChange={onChangeHandler} value={data.street} type="text" placeholder='Street' />
-
+        <input name='email' onChange={onChangeHandler} value={data.email} type="email" placeholder='Email address' required />
+        <input name='street' onChange={onChangeHandler} value={data.street} type="text" placeholder='Street' required />
         <div className="multi-fields">
-          <input name='city' onChange={onChangeHandler} value={data.city} type="text" placeholder='City' />
-          <input name='state' onChange={onChangeHandler} value={data.state} type="text" placeholder='State' />
+          <input name='city' onChange={onChangeHandler} value={data.city} type="text" placeholder='City' required />
+          <input name='state' onChange={onChangeHandler} value={data.state} type="text" placeholder='State' required />
         </div>
-
         <div className="multi-fields">
-          <input name='zipcode' onChange={onChangeHandler} value={data.zipcode} type="text" placeholder='Zip Code' />
-          <input name='country' onChange={onChangeHandler} value={data.country} type="text" placeholder='Country' />
+          <input name='zipcode' onChange={onChangeHandler} value={data.zipcode} type="text" placeholder='Zip Code' required />
+          <input name='country' onChange={onChangeHandler} value={data.country} type="text" placeholder='Country' required />
         </div>
-
-        <input name='phone' onChange={onChangeHandler} value={data.phone} type="text" placeholder='Phone' />
+        <input name='phone' onChange={onChangeHandler} value={data.phone} type="text" placeholder='Phone' required />
       </div>
       <div className="place-order-right">
         <div className="cart-total">
@@ -133,7 +93,7 @@ const PlaceOrder = () => {
               <p>${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}</p>
             </div>
           </div>
-          <button type="button" onClick={handleKhaltiPayment}>PROCEED TO PAYMENT</button>
+          <button type="submit">PROCEED TO PAYMENT</button>
         </div>
       </div>
     </form>

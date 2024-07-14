@@ -2,6 +2,7 @@ import orderModel from '../models/orderModel.js';
 import userModel from '../models/userModule.js';
 
 const placeOrder = async (req, res) => {
+  const frontend_url="http://localhost:5173"
   try {
     const newOrder = new orderModel({
       userId: req.body.userId,
@@ -47,5 +48,12 @@ const verifyPayment = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
-
+export const verifyResponse = (req, res) => {
+  const { success, orderId } = req.query;
+  if (success === 'true') {
+    res.send(`Payment verification successful for order ID: ${orderId}`);
+  } else {
+    res.send(`Payment verification failed for order ID: ${orderId}`);
+  }
+};
 export { placeOrder, verifyPayment };
