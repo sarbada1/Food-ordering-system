@@ -1,15 +1,16 @@
-import React, { useContext } from 'react';
-import './Cart.css';
-import { StoreContext } from '../../context/StoreContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useContext } from "react";
+import "./Cart.css";
+import { StoreContext } from "../../context/StoreContext";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const { cartItems, food_list, url, removeFromCart, getTotalCartAmount } = useContext(StoreContext);
+  const { cartItems, food_list, url, removeFromCart, getTotalCartAmount } =
+    useContext(StoreContext);
   const navigate = useNavigate();
 
   return (
     <div>
-      <div className='cart'>
+      <div className="cart">
         <div className="cart-items"></div>
         <div className="cart-items-title">
           <p>Items</p>
@@ -31,7 +32,9 @@ const Cart = () => {
                   <p>${item.price}</p>
                   <p>{cartItems[item._id]}</p>
                   <p>${item.price * cartItems[item._id]}</p>
-                  <p onClick={() => removeFromCart(item._id)} className='cross'>x</p>
+                  <p onClick={() => removeFromCart(item._id)} className="cross">
+                    x
+                  </p>
                 </div>
                 <hr />
               </React.Fragment>
@@ -56,16 +59,20 @@ const Cart = () => {
             <hr />
             <div className="cart-total-details">
               <p>Total</p>
-              <p>${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}</p>
+              <p>
+                ${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}
+              </p>
             </div>
           </div>
-          <button onClick={() => navigate('/order')}>PROCEED TO CHECKOUT</button>
+          <button onClick={() => navigate("/order")}>
+            PROCEED TO CHECKOUT
+          </button>
         </div>
         <div className="cart-promocode">
           <div>
             <p>If you have a promo code, Enter it here</p>
             <div className="cart-promocode-input">
-              <input type="text" placeholder='promocode' />
+              <input type="text" placeholder="promocode" />
               <button>Submit</button>
             </div>
           </div>

@@ -4,16 +4,29 @@ import "./Navbar.css";
 import { assets } from "../../assets/assets";
 import { Link, useNavigate } from "react-router-dom";
 import { StoreContext } from "../../context/StoreContext";
+
 function Navbar({ setShowLogin }) {
   const [menu, setMenu] = useState("home");
   const { getTotalCartAmount, token, setToken } = useContext(StoreContext);
   const navigate = useNavigate();
+
   const logout = () => {
     localStorage.removeItem("token");
     setToken("");
     navigate("/");
   };
 
+  function signInClick() {
+    setShowLogin(true);
+  }
+  function cartClicked() {
+    if (token) {
+      navigate("/cart");
+      setMenu("");
+    } else {
+      setShowLogin(true);
+    }
+  }
   useEffect(() => {
     const handleScroll = () => {
       const navbar = document.querySelector(".navbar");
@@ -32,43 +45,42 @@ function Navbar({ setShowLogin }) {
 
   return (
     <div className="navbar">
-      <Link to="/">
-        {" "}
+      <Link to={{ pathname: "/", hash: "#home" }}>
         <img src={assets.logo} alt="" className="logo" />
       </Link>
       <ul className="navbar-menu">
         <Link
-          to="/"
+          to={{ pathname: "/", hash: "#home" }}
           onClick={() => setMenu("home")}
           className={menu === "home" ? "active" : ""}
         >
           Home
         </Link>
-        <a
-          href="#explore-menu"
+        <Link
+          to={{ pathname: "/", hash: "#explore-menu" }}
           onClick={() => setMenu("menu")}
           className={menu === "menu" ? "active" : ""}
         >
           Menu
-        </a>
-        <a
-          href="#app-download"
+        </Link>
+        <Link
+          to={{ pathname: "/", hash: "#app-download" }}
           onClick={() => setMenu("mobile-app")}
           className={menu === "mobile-app" ? "active" : ""}
         >
           Mobile app
-        </a>
+        </Link>
       </ul>
       <div className="navbar-right">
-        <img src={assets.search_icon} alt="" />
+        {/* <img src={assets.search_icon} alt="" /> */}
         <div className="navbar-search-icon">
-          <Link to="/cart">
+          <div onClick={cartClicked} style={{ cursor: "pointer" }}>
             <img src={assets.basket_icon} alt="" />
-          </Link>
+          </div>
           <div className={getTotalCartAmount() === 0 ? "" : "dot"}></div>
         </div>
         {!token ? (
-          <button onClick={() => setShowLogin(true)}>Sign in</button>
+          <button onClick={signInClick}>Sign in</button>
         ) : (
           <div className="navbar-profile">
             <img src={assets.profile_icon} alt="" />

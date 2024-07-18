@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { createContext, useEffect, useState } from "react";
 import axios from "axios";
 
@@ -18,9 +19,13 @@ const StoreContextProvider = (props) => {
     }
     if (token) {
       try {
-        await axios.post(url + "/api/cart/add", { itemId }, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.post(
+          url + "/api/cart/add",
+          { itemId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       } catch (error) {
-        console.error("Error adding to cart:", error);
+        alert("Error adding to cart:", error);
       }
     }
   };
@@ -29,9 +34,13 @@ const StoreContextProvider = (props) => {
     setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 }));
     if (token) {
       try {
-        await axios.post(url + "/api/cart/remove", { itemId }, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.post(
+          url + "/api/cart/remove",
+          { itemId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       } catch (error) {
-        console.error("Error removing from cart:", error);
+        alert("Error removing from cart:", error);
       }
     }
   };
@@ -60,13 +69,16 @@ const StoreContextProvider = (props) => {
 
   const loadCartData = async (token) => {
     try {
-      const response = await axios.post(url + "/api/cart/get", {}, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get(
+        url + "/api/cart/get",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setCartItems(response.data.cartData);
     } catch (error) {
       console.error("Error loading cart data:", error);
     }
   };
-  
 
   useEffect(() => {
     async function loaddata() {
@@ -82,7 +94,6 @@ const StoreContextProvider = (props) => {
     }
     loaddata();
   }, []);
-  
 
   const contextValue = {
     food_list,
@@ -95,7 +106,7 @@ const StoreContextProvider = (props) => {
     token,
     setToken,
     showLogin,
-    setShowLogin // Add setShowLogin to the context value
+    setShowLogin, // Add setShowLogin to the context value
   };
 
   return (
