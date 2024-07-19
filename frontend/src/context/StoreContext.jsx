@@ -63,17 +63,17 @@ const StoreContextProvider = (props) => {
       const response = await axios.get(`${url}/api/food/list`);
       setFoodList(response.data.data);
     } catch (error) {
-      console.error("Error fetching food list:", error);
+      alert("Error fetching food list:", error);
     }
   };
 
   const loadCartData = async (token) => {
     try {
-      const response = await axios.get(
-        url + "/api/cart/get",
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await axios({
+        method: "get",
+        url: url + "/api/cart/get",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setCartItems(response.data.cartData);
     } catch (error) {
       console.error("Error loading cart data:", error);
@@ -84,7 +84,6 @@ const StoreContextProvider = (props) => {
     async function loaddata() {
       await fetchFoodList();
       const storedToken = localStorage.getItem("token");
-      console.log("Stored Token:", storedToken); // Log the token
       if (storedToken) {
         setToken(storedToken);
         await loadCartData(storedToken);

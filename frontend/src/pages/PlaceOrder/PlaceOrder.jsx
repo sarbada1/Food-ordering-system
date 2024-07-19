@@ -6,6 +6,7 @@ import axios from "axios";
 const PlaceOrder = () => {
   const { getTotalCartAmount, food_list, token, cartItems, url } =
     useContext(StoreContext);
+
   const [data, setData] = useState({
     firstName: "",
     lastName: "",
@@ -27,27 +28,25 @@ const PlaceOrder = () => {
   const placeorder = async (event) => {
     event.preventDefault();
     let orderItems = [];
-    food_list.map((item) => {
+    food_list.forEach((item) => {
       if (cartItems[item._id] > 0) {
         let itemInfo = { ...item, quantity: cartItems[item._id] };
         orderItems.push(itemInfo);
       }
     });
-    let orderData = {
+    const orderData = {
       address: data,
       items: orderItems,
-      amount: getTotalCartAmount() + 20,
+      amount: getTotalCartAmount() + 2,
     };
     try {
-      let response = await axios.post(`${url}/api/order/place`, orderData, {
-        headers: { token },
+      const response = await axios.post(`${url}/api/order/place`, orderData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (response.data.success) {
-        const { session_url } = response.data;
-        window.location.replace(session_url);
-      } else {
-        alert("Error");
-      }
+      console.log(response);
+      setTimeout(() => {
+        window.location.href = response.data.payment.payment_url;
+      }, 1000);
     } catch (error) {
       console.error("Order placement error:", error);
       alert("Error placing order");
